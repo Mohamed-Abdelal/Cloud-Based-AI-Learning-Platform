@@ -1,0 +1,164 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: tts-service
+    url: http://tts-service:8000
+    routes:
+      - name: tts-route
+        paths:
+          - /api/tts
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+
+  - name: stt-service
+    url: http://stt-service:8000
+    routes:
+      - name: stt-route
+        paths:
+          - /api/stt
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+
+  - name: chat-service
+    url: http://chat-service:8000
+    routes:
+      - name: chat-route
+        paths:
+          - /api/chat
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+
+  - name: document-service
+    url: http://document-service:8000
+    routes:
+      - name: document-route
+        paths:
+          - /api/documents
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: rate-limiting
+        config:
+          minute: 50
+          hour: 500
+
+  - name: quiz-service
+    url: http://quiz-service:8000
+    routes:
+      - name: quiz-route
+        paths:
+          - /api/quiz
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+    plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+
+  - name: user-service
+    url: http://user-service:8000
+    routes:
+      - name: user-route
+        paths:
+          - /api/users
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+
+  - name: auth-service
+    url: http://api-gateway:8000
+    routes:
+      - name: auth-route
+        paths:
+          - /api/auth
+        strip_path: false
+        methods:
+          - POST
+          - GET
+
+# Global plugins
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      headers:
+        - Authorization
+        - Content-Type
+        - X-User-ID
+      exposed_headers:
+        - X-Request-ID
+      credentials: true
+      max_age: 3600
+
+  - name: request-id
+    config:
+      header_name: X-Request-ID
+      echo_downstream: true
+
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      echo_downstream: true
+      generator: uuid
