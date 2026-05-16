@@ -156,7 +156,3 @@ For deep-dive technical documentation, including API specs and architecture diag
 - [Architecture Documentation](./docs/ARCHITECTURE.md)
 
 ---
-
-<div align="center">
-  <i>Developed to showcase advanced cloud engineering, microservices architecture, and secure Python development practices.</i>
-</div>
