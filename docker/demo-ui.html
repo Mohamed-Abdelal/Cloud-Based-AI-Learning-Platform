@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Learning Platform Demo UI</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --border: #1f2937;
+      --accent: #10b981;
+      --accent-2: #38bdf8;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #111827 100%); color: var(--text); }
+    h1 { margin: 0 0 12px 0; font-weight: 700; }
+    h2 { margin: 0 0 12px 0; font-size: 18px; letter-spacing: 0.2px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+    section { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    label { display: block; margin: 8px 0 4px; font-size: 13px; color: var(--muted); }
+    input, textarea, select, button { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: #0b1628; color: var(--text); font-size: 14px; }
+    textarea { resize: vertical; min-height: 60px; }
+    button { cursor: pointer; border: none; background: var(--accent); color: #0b1220; font-weight: 700; letter-spacing: 0.2px; transition: transform 0.05s ease, box-shadow 0.1s ease; }
+    button:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(16,185,129,0.35); }
+    .btn-secondary { background: var(--accent-2); color: #0b1220; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    pre { background: #0b1628; border: 1px solid var(--border); border-radius: 10px; padding: 10px; overflow: auto; font-size: 13px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #0b1628; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; color: var(--muted); margin-right: 8px; }
+    .status { margin-top: 6px; font-size: 13px; color: var(--muted); }
+    .success { color: var(--accent); }
+    .error { color: var(--danger); }
+    .flex { display: flex; gap: 10px; align-items: center; }
+    .audio-box { display: flex; gap: 10px; align-items: center; }
+    .tag { display: inline-block; padding: 2px 8px; background: #0b1628; border-radius: 999px; border: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+    .loading { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: var(--text); animation: spin 0.6s linear infinite; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>Cloud Learning Platform Demo</h1>
+  <div class="pill">Base: http://localhost:8080</div>
+  <div class="pill">Login works with any user_id (demo-user by default)</div>
+
+  <div class="grid">
+    <section id="auth">
+      <h2>Login</h2>
+      <label>User ID</label>
+      <div class="flex" style="gap:8px; align-items:center;">
+        <input id="userId" value="demo-user" style="flex:1" />
+        <button id="randUserBtn" style="width:150px;" class="btn-secondary">Random</button>
+      </div>
+      <button id="loginBtn">Login</button>
+      <div id="authStatus" class="status"></div>
+    </section>
+
+    <section id="chat">
+      <h2>Chat</h2>
+      <div class="row">
+        <button id="chatRefreshBtn" class="btn-secondary">Refresh Conversations</button>
+        <select id="conversationSelect"></select>
+      </div>
+      <label>Message</label>
+      <textarea id="chatMessage" rows="3">Hello, generate a short reply.</textarea>
+      <button id="chatBtn">Send</button>
+      <div id="chatStatus" class="status"></div>
+      <pre id="chatOutput"></pre>
+    </section>
+
+    <section id="tts">
+      <h2>Text → Speech</h2>
+      <label>Text</label>
+      <textarea id="ttsText" rows="2">Welcome to the cloud learning platform demo.</textarea>
+      <button id="ttsBtn">Generate &amp; Play</button>
+      <div id="ttsStatus" class="status"></div>
+      <div class="audio-box">
+        <audio id="ttsAudio" controls></audio>
+        <span id="ttsMeta" class="tag"></span>
+      </div>
+      <pre id="ttsOutput"></pre>
+    </section>
+
+    <section id="stt">
+      <h2>Speech → Text</h2>
+      <label>Audio File (wav/mp3)</label>
+      <input id="sttFile" type="file" accept="audio/*" />
+      <button id="sttBtn">Transcribe</button>
+      <div id="sttStatus" class="status"></div>
+      <pre id="sttOutput"></pre>
+    </section>
+
+    <section id="docs">
+      <h2>Documents</h2>
+      <label>Upload Document</label>
+      <input id="docFile" type="file" accept=".txt,.pdf,.doc,.docx,.md" />
+      <button id="docUploadBtn">Upload</button>
+      <div class="row">
+        <button id="listDocsBtn" class="btn-secondary">List Documents</button>
+        <select id="docSelect"></select>
+        <button id="listNotesBtn" class="btn-secondary">Get Notes</button>
+      </div>
+      <div id="docStatus" class="status"></div>
+      <pre id="docOutput"></pre>
+      <pre id="notesOutput"></pre>
+    </section>
+
+    <section id="quiz">
+      <h2>Quiz</h2>
+      <label>Document (auto from upload/list)</label>
+      <input id="quizDocId" placeholder="Select a document above" />
+      <label>Notes ID (optional)</label>
+      <input id="quizNotesId" />
+      <label>Number of Questions</label>
+      <input id="quizNum" type="number" value="3" min="1" max="10" />
+      <button id="quizGenBtn">Generate Quiz</button>
+      <div class="row">
+        <button id="quizHistoryBtn" class="btn-secondary">Quiz History</button>
+        <input id="quizIdInput" placeholder="Quiz ID to fetch" />
+        <button id="quizFetchBtn" class="btn-secondary">Get Quiz</button>
+      </div>
+      <div id="quizStatus" class="status"></div>
+      <pre id="quizOutput"></pre>
+      <pre id="quizHistoryOutput"></pre>
+    </section>
+  </div>
+
+  <script>
+    const base = 'http://localhost:8080';
+    let token = '';
+
+    function showLoading(btn) {
+      btn.disabled = true;
+      const origText = btn.textContent;
+      btn.innerHTML = '<span class="loading"></span>' + origText;
+      btn.dataset.origText = origText;
+      return () => {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.origText;
+      };
+    }
+
+    const els = {
+      authStatus: document.getElementById('authStatus'),
+      chatStatus: document.getElementById('chatStatus'),
+      ttsStatus: document.getElementById('ttsStatus'),
+      sttStatus: document.getElementById('sttStatus'),
+      docStatus: document.getElementById('docStatus'),
+      quizStatus: document.getElementById('quizStatus'),
+      conversationSelect: document.getElementById('conversationSelect'),
+      docSelect: document.getElementById('docSelect'),
+      ttsAudio: document.getElementById('ttsAudio'),
+      ttsMeta: document.getElementById('ttsMeta'),
+    };
+
+    function setStatus(el, msg, ok=false) {
+      el.textContent = msg;
+      el.className = 'status ' + (ok ? 'success' : 'error');
+    }
+
+    async function api(path, options = {}) {
+      if (!token) throw new Error('Login first');
+      const headers = options.headers ? { ...options.headers } : {};
+      headers['Authorization'] = `Bearer ${token}`;
+      if (!headers['Content-Type'] && !(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
+      const res = await fetch(base + path, { ...options, headers });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || res.statusText);
+      }
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) return res.json();
+      return res.text();
+    }
+
+    function randomUser() {
+      return 'demo-' + Math.random().toString(16).slice(2, 8);
+    }
+
+    document.getElementById('randUserBtn').onclick = () => {
+      document.getElementById('userId').value = randomUser();
+    };
+
+    document.getElementById('loginBtn').onclick = async () => {
+      const btn = document.getElementById('loginBtn');
+      const hideLoad = showLoading(btn);
+      const userId = document.getElementById('userId').value.trim() || randomUser();
+      const statusEl = els.authStatus;
+      try {
+        const res = await fetch(base + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        token = data.token;
+        setStatus(statusEl, `Logged in as ${data.user_id || userId}`, true);
+        await Promise.all([loadConversations(), loadDocs(), loadQuizHistorySafe()]);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    async function loadConversations() {
+      try {
+        const data = await api('/api/chat/conversations');
+        const sel = els.conversationSelect;
+        sel.innerHTML = '';
+        const optNew = document.createElement('option');
+        optNew.value = '';
+        optNew.textContent = 'Start new conversation';
+        sel.appendChild(optNew);
+        (data || []).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id || c.conversation_id || '';
+          opt.textContent = `${c.id || c.conversation_id} · ${c.created_at || ''}`;
+          sel.appendChild(opt);
+        });
+      } catch (e) {
+        // silent for now
+      }
+    }
+
+    document.getElementById('chatRefreshBtn').onclick = loadConversations;
+
+    document.getElementById('chatBtn').onclick = async () => {
+      const btn = document.getElementById('chatBtn');
+      const hideLoad = showLoading(btn);
+      const msg = document.getElementById('chatMessage').value;
+      const convId = els.conversationSelect.value || null;
+      const statusEl = els.chatStatus;
+      try {
+        const data = await api('/api/chat/message', {
+          method: 'POST',
+          body: JSON.stringify({ message: msg, conversation_id: convId })
+        });
+        document.getElementById('chatOutput').textContent = JSON.stringify(data, null, 2);
+        if (data.conversation_id) els.conversationSelect.value = data.conversation_id;
+        setStatus(statusEl, 'Chat sent', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    document.getElementById('ttsBtn').onclick = async () => {
+      const btn = document.getElementById('ttsBtn');
+      const hideLoad = showLoading(btn);
+      const text = document.getElementById('ttsText').value;
+      const statusEl = els.ttsStatus;
+      try {
+        const data = await api('/api/tts/generate', {
+          method: 'POST',
+          body: JSON.stringify({ text })
+        });
+        document.getElementById('ttsOutput').textContent = JSON.stringify(data, null, 2);
+        if (data.download_url) {
+          const audioRes = await fetch(base + data.download_url, { headers: { Authorization: `Bearer ${token}` } });
+          const blob = await audioRes.blob();
+          const url = URL.createObjectURL(blob);
+          els.ttsAudio.src = url;
+          els.ttsAudio.play().catch(() => {});
+          els.ttsMeta.textContent = data.audio_id || 'audio ready';
+        }
+        setStatus(statusEl, 'TTS created', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    document.getElementById('sttBtn').onclick = async () => {
+      const btn = document.getElementById('sttBtn');
+      const hideLoad = showLoading(btn);
+      const file = document.getElementById('sttFile').files[0];
+      const statusEl = els.sttStatus;
+      if (!file) {
+        hideLoad();
+        return setStatus(statusEl, 'Pick an audio file');
+      }
+      try {
+        const form = new FormData();
+        form.append('audio', file);
+        const data = await api('/api/stt/transcribe', { method: 'POST', body: form });
+        document.getElementById('sttOutput').textContent = JSON.stringify(data, null, 2);
+        setStatus(statusEl, 'Transcribed', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    async function loadDocs() {
+      try {
+        const data = await api('/api/documents');
+        const sel = els.docSelect;
+        sel.innerHTML = '';
+        (data || []).forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.id || d.document_id;
+          opt.textContent = `${d.filename || 'doc'} · ${d.id || d.document_id}`;
+          sel.appendChild(opt);
+        });
+        if (sel.value) document.getElementById('quizDocId').value = sel.value;
+        document.getElementById('docOutput').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        // ignore list errors on load
+      }
+    }
+
+    document.getElementById('listDocsBtn').onclick = async () => {
+      const btn = document.getElementById('listDocsBtn');
+      const hideLoad = showLoading(btn);
+      try {
+        await loadDocs();
+      } finally {
+        hideLoad();
+      }
+    };
+
+    document.getElementById('docUploadBtn').onclick = async () => {
+      const btn = document.getElementById('docUploadBtn');
+      const hideLoad = showLoading(btn);
+      const file = document.getElementById('docFile').files[0];
+      const statusEl = els.docStatus;
+      if (!file) {
+        hideLoad();
+        return setStatus(statusEl, 'Pick a document');
+      }
+      try {
+        const form = new FormData();
+        form.append('document', file);
+        const data = await api('/api/documents/upload', { method: 'POST', body: form });
+        document.getElementById('docOutput').textContent = JSON.stringify(data, null, 2);
+        if (data.document_id) {
+          const opt = document.createElement('option');
+          opt.value = data.document_id;
+          opt.textContent = `${data.filename || 'doc'} · ${data.document_id}`;
+          els.docSelect.prepend(opt);
+          els.docSelect.value = data.document_id;
+          document.getElementById('quizDocId').value = data.document_id;
+          if (data.notes_id) document.getElementById('quizNotesId').value = data.notes_id;
+        }
+        setStatus(statusEl, 'Uploaded', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    document.getElementById('listNotesBtn').onclick = async () => {
+      const btn = document.getElementById('listNotesBtn');
+      const hideLoad = showLoading(btn);
+      const docId = els.docSelect.value || document.getElementById('quizDocId').value.trim();
+      const statusEl = els.docStatus;
+      if (!docId) {
+        hideLoad();
+        return setStatus(statusEl, 'Select or enter a document');
+      }
+      try {
+        const data = await api(`/api/documents/${docId}/notes`);
+        document.getElementById('notesOutput').textContent = JSON.stringify(data, null, 2);
+        if (Array.isArray(data) && data[0] && data[0].id) document.getElementById('quizNotesId').value = data[0].id;
+        setStatus(statusEl, 'Notes fetched', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    document.getElementById('quizGenBtn').onclick = async () => {
+      const btn = document.getElementById('quizGenBtn');
+      const hideLoad = showLoading(btn);
+      const docId = document.getElementById('quizDocId').value.trim() || els.docSelect.value;
+      const notesId = document.getElementById('quizNotesId').value.trim();
+      const num = Number(document.getElementById('quizNum').value || 3);
+      const statusEl = els.quizStatus;
+      if (!docId) {
+        hideLoad();
+        return setStatus(statusEl, 'Pick a document first');
+      }
+      try {
+        const payload = { document_id: docId, num_questions: num };
+        if (notesId) payload.notes_id = notesId;
+        const data = await api('/api/quiz/generate', { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('quizOutput').textContent = JSON.stringify(data, null, 2);
+        if (data.quiz_id) document.getElementById('quizIdInput').value = data.quiz_id;
+        setStatus(statusEl, 'Quiz generated', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    async function loadQuizHistorySafe() {
+      try { await document.getElementById('quizHistoryBtn').onclick(); } catch (e) { /* ignore */ }
+    }
+
+    document.getElementById('quizHistoryBtn').onclick = async () => {
+      const btn = document.getElementById('quizHistoryBtn');
+      const hideLoad = showLoading(btn);
+      const statusEl = els.quizStatus;
+      try {
+        const data = await api('/api/quiz/history');
+        document.getElementById('quizHistoryOutput').textContent = JSON.stringify(data, null, 2);
+        setStatus(statusEl, 'History loaded', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+
+    document.getElementById('quizFetchBtn').onclick = async () => {
+      const btn = document.getElementById('quizFetchBtn');
+      const hideLoad = showLoading(btn);
+      const quizId = document.getElementById('quizIdInput').value.trim();
+      const statusEl = els.quizStatus;
+      if (!quizId) {
+        hideLoad();
+        return setStatus(statusEl, 'Quiz ID required');
+      }
+      try {
+        const data = await api(`/api/quiz/${quizId}`);
+        document.getElementById('quizOutput').textContent = JSON.stringify(data, null, 2);
+        setStatus(statusEl, 'Quiz fetched', true);
+      } catch (e) {
+        setStatus(statusEl, e.message);
+      } finally {
+        hideLoad();
+      }
+    };
+  </script>
+</body>
+</html>

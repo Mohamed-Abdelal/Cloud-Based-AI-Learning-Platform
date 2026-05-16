@@ -1,0 +1,52 @@
+{
+  "bucket_policies": {
+    "service_bucket_template": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "AllowVPCE",
+          "Effect": "Allow",
+          "Principal": "*",
+          "Action": "s3:*",
+          "Resource": [
+            "arn:aws:s3:::${bucket_name}",
+            "arn:aws:s3:::${bucket_name}/*"
+          ],
+          "Condition": {
+            "StringEquals": {
+              "aws:SourceVpce": "${vpc_endpoint_id}"
+            }
+          }
+        },
+        {
+          "Sid": "DenyInsecure",
+          "Effect": "Deny",
+          "Principal": "*",
+          "Action": "s3:*",
+          "Resource": [
+            "arn:aws:s3:::${bucket_name}",
+            "arn:aws:s3:::${bucket_name}/*"
+          ],
+          "Condition": {
+            "Bool": { "aws:SecureTransport": "false" }
+          }
+        }
+      ]
+    }
+  },
+  "lifecycle_policy": {
+    "Rules": [
+      {
+        "ID": "ExpireTempUploads",
+        "Prefix": "temp/",
+        "Status": "Enabled",
+        "Expiration": { "Days": 30 }
+      },
+      {
+        "ID": "NonCurrentVersionRetention",
+        "Status": "Enabled",
+        "NoncurrentVersionExpiration": { "NoncurrentDays": 90 }
+      }
+    ]
+  }
+}

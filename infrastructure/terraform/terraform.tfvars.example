@@ -1,0 +1,19 @@
+aws_region   = "us-east-1"
+environment  = "dev"
+project_name = "cloud-learning-platform"
+vpc_cidr     = "10.0.0.0/16"
+key_name     = "your-ec2-key-pair-name"
+
+# Database password (use AWS Secrets Manager in production)
+db_password = "ChangeThisPassword123!"
+
+# Instance types
+instance_type      = "t3.medium"
+kafka_instance_type = "t3.medium"
+rds_instance_class = "db.t3.medium"
+
+# Auto Scaling
+min_size        = 3
+max_size        = 6
+desired_capacity = 3
+
